@@ -1,0 +1,19 @@
+def isCarmichael(n):
+    x = 0
+    for i in range(2,n):
+        if(n%i==0):
+            x=1
+    if(x==0): return False
+    #if n is prime then it is not Carmichael so we return False
+
+    for i in range(2,n+1):
+        if(gcd(i,n) == 1):
+            if(i**(n-1)%n == 1):continue
+            else: return False
+    return True
+
+N = int(input("Enter a positive integer N: "))
+
+for i in range(2, N+1):
+    if(isCarmichael(i)):
+        print(f"{i} is a Carmichael Number")

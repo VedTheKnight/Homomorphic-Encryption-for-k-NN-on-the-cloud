@@ -1,0 +1,26 @@
+def isPrime(n):
+    for i in range(2,n):
+        if(n%i==0):return False
+    return True
+
+def four_tuple(k):
+    p=0
+    q=0
+    for i in range(10^(k-1),10^k):
+        if(p!=0 and isPrime(i)):
+            q = i
+            break
+        if(p == 0 and isPrime(i)):
+            p = i
+
+    a = 1
+    while(True):
+        if((a*p-1)%q==0):
+             b = (1-a*p)/q
+             break
+        a+=1
+
+    return (p,q,a,b)
+
+k = int(input("Enter a number k: "))
+print(four_tuple(k))
