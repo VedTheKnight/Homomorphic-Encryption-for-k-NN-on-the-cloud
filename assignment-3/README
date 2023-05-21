@@ -1,0 +1,17 @@
+Program 1:
+
+create objects for Alice and Bob as shown:
+
+alice = RSA(k=1024)
+N_local,e_local = alice.get_public_key()
+
+bob = RSA(k=1024,e=e_local,N=N_local)
+message = "hello"
+message = message.encode('utf-8')
+cipher = bob.encrypt(message)
+
+decrypted_message = alice.decrypt(cipher)
+print(f"Plaintext:{decrypted_message.decode('utf-8')}")
+
+run the program in sagemath terminal by executing the following command:
+load("RSA.py")
