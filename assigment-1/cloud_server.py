@@ -12,18 +12,18 @@ def isPrime(n):
 def nextPrime(n):
     n += 1
     while(not isPrime(n)):
-        if(not isPrime(n)):
-            n += 1
+        n += 1
     return n
 
 #function to factorize n and return an array consisting of each prime factor
 def factorize(n):
     factors = []
-    for i in range(2,n+1):
-            while(n>0 and isPrime(i) and n%i==0):
-                factors.append(i)
-                n = n/i
-            i = nextPrime(i)
+    i=2
+    while (n > 1):
+        while(n % i == 0):
+            factors.append(i)
+            n = n / i
+        i = nextPrime(i)
     return factors
 
 if __name__ == '__main__':
