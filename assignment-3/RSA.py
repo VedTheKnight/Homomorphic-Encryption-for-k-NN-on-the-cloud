@@ -1,10 +1,11 @@
 import random
+import json
 
 class RSA:
-    def __init__(self, k=0, e=65537,N=0):
+    def __init__(self, k=0, e=65537):
         self.k = k
         self.e = e
-        self.N = N
+        self.N = 0
         self.p = 0
         self.q = 0
 
@@ -85,25 +86,22 @@ class RSA:
         return (self.N,self.e)
 
     def encrypt(self, plaintext):
-        #plaintext_int = int(plaintext.decode('utf-8'))
-        plaintext_int = int.from_bytes(plaintext, 'big')
-        if(plaintext_int>=self.N):
-            print("Invalid message! Please try again with a different message!")
+        plaintext_tuple = json.loads(plaintext.decode('utf-8'))
+        plaintext_int = int.from_bytes(plaintext_tuple[0].encode('utf-8'), 'big')
+        if(plaintext_int>=plaintext_tuple[1]):
+            raise ValueError("Invalid message! Please try again with a different message!")
         else:
-            M = power_mod(plaintext_int,self.e,self.N)
-            #M_bytes = str(M).encode('utf-8')
+            M = power_mod(plaintext_int,plaintext_tuple[2],plaintext_tuple[1])
             M_bytes = M.to_bytes((M.bit_length() + 7) // 8, 'big')
             return M_bytes
 
     def decrypt(self,ciphertext):
-        #ciphertext_int = int(ciphertext.decode('utf-8'))
         ciphertext_int = int.from_bytes(ciphertext, 'big')
         if (ciphertext_int >= self.N):
             print("Invalid message! Please try again with a different message!")
         else:
             d = inverse_mod(self.e, (self.p-1)*(self.q-1))
             m = power_mod(ciphertext_int,d, self.N)
-            #m_bytes = str(m).encode('utf-8')
             m_bytes = m.to_bytes((m.bit_length() + 7) // 8, 'big')
             return m_bytes
 
