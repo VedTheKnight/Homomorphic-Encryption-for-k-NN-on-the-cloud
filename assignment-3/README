@@ -17,6 +17,9 @@ print(f"Plaintext : {decrypted_message.decode('utf-8')}")
 run the program in sagemath terminal by executing the following command:
 load("RSA.py")
 
+Note:
+1. If the message is too long the program terminates and gives a value error.
+
 Program 2:
 
 bob = ElGamal(51,356946343358715584277268939833200898638115523809875957978296404324882635483239652693185396510297393318766806270336708224092728306993230856774545615633749902372048048265678686975662568763138587679678543730494365670031920127769412328695198054176711730984373627043994772365720336206479390798908230342619)
@@ -35,3 +38,25 @@ load("ElGamal.py")
 Note:
 1. If the message is too long the program terminates and gives a value error.
 2. p is set very large to accommodate for larger messages
+
+Program 3:
+
+alice = Paillier(k=1024)
+bob = Paillier(k=1024)
+
+n_local,g_local = alice.get_public_key()
+message = "hello"
+plaintext = (message,int(n_local),int(g_local))
+
+plaintext = json.dumps(plaintext).encode('utf-8')
+
+ciphertext = bob.encrypt(plaintext)
+
+decrypted_message = alice.decrypt(ciphertext)
+print(f"Plaintext : {decrypted_message.decode('utf-8')}")
+
+run the program in sagemath terminal by executing the following command:
+load("Paillier.py")
+
+Note:
+1. If the message is too long the program terminates and gives a value error.
