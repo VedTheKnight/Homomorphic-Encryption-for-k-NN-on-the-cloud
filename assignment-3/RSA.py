@@ -83,15 +83,14 @@ class RSA:
 
     def get_public_key(self):
         self.N = self.p * self.q
-        return (self.N,self.e)
+        return self.N,self.e
 
     def encrypt(self, plaintext):
-        plaintext_tuple = json.loads(plaintext.decode('utf-8'))
-        plaintext_int = int.from_bytes(plaintext_tuple[0].encode('utf-8'), 'big')
-        if(plaintext_int>=plaintext_tuple[1]):
+        plaintext_int = int.from_bytes(plaintext, 'big')
+        if(plaintext_int>=self.N):
             raise ValueError("Invalid message! Please try again with a different message!")
         else:
-            M = power_mod(plaintext_int,plaintext_tuple[2],plaintext_tuple[1])
+            M = power_mod(plaintext_int,self.e,self.N)
             M_bytes = M.to_bytes((M.bit_length() + 7) // 8, 'big')
             return M_bytes
 
@@ -104,6 +103,5 @@ class RSA:
             m = power_mod(ciphertext_int,d, self.N)
             m_bytes = m.to_bytes((m.bit_length() + 7) // 8, 'big')
             return m_bytes
-
 
 
