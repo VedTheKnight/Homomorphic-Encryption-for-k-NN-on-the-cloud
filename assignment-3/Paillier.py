@@ -1,7 +1,6 @@
 import random
-import json
-#this version works for small messages - error in prime generation not k-bit
-#issue in encryption -- very slow for large values!
+
+
 class Paillier:
 
     def __init__(self,k = 1024):
@@ -43,7 +42,6 @@ class Paillier:
         if(plaintext_int >= int(self.n)):
             raise ValueError("Invalid Message! Please try again with a smaller message.")
         else:
-            #ciphertext_int = int(mod(int(plaintext_tuple[2]**plaintext_int)*int(self.r**plaintext_tuple[1]),plaintext_tuple[1]**2))#integer
             ciphertext_int = int(mod(power_mod(self.g, plaintext_int, self.n ** 2) * power_mod(self.r,self.n,self.n ** 2),self.n ** 2))
             ciphertext_bytes = ciphertext_int.to_bytes((ciphertext_int.bit_length() + 7) // 8, 'big')
             return ciphertext_bytes

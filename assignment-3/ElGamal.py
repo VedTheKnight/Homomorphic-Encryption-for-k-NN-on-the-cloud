@@ -1,5 +1,4 @@
 import random
-import json
 
 class ElGamal:
     def __init__(self,g,p):

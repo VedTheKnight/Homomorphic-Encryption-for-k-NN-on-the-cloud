@@ -1,5 +1,4 @@
 import random
-import json
 
 class RSA:
     def __init__(self, k=0, e=65537):
