@@ -15,4 +15,3 @@ Instructions to run the Program:
     python query_user.py
 
 It can be checked that the prime factorization is appended to the prime_factorization.txt file in the volume mount.
-    
