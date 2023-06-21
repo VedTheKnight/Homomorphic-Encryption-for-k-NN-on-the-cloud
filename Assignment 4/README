@@ -1,17 +1,14 @@
 Instructions to run the Program:
 
-1. Create a file named query_data.txt in the directory containing the dockerfile and the python codes. This file must contain the number on which the operations are to be run
-2. Create a volume mount : docker volume create factors-db
-3. Build the container : docker build -t cloud-server .
-4. Run the container : docker run -itd --name cloud-server-container --mount type=volume,source=factors-db,target=/vol --mount type=bind,source=/pwd/query_data.txt,target=/tmp/data/query_data.txt -p 65433:65433 cloud-server
-5. We need to create a prime_factorization.txt file in the container :
-    docker exec -it cloud-server-container sh
-    cd ..
-    cd vol
-    touch prime_factorization.txt
-    exit
-6. Now proceed to run the data owner and query user files -
+1. Create a file named query_data.txt in /tmp/data. This file must contain the number on which the operations are to be run
+
+2. Build the container : docker build -t cloud-server .
+
+3. Run the container : docker run -itd --name cloud-server-container --mount type=volume,source=factors-db,target=/factors-db --mount type=bind,source=/tmp/data/query_data.txt,target=/tmp/data -p 65433:65433 cloud-server
+
+4. Now proceed to run the data owner and query user files on separate terminals -
     python data_owner.py
     python query_user.py
 
-It can be checked that the prime factorization is appended to the prime_factorization.txt file in the volume mount.
+It can be checked that the prime factorization is appended to the "factors" file in the volume mount -
+    cat factors

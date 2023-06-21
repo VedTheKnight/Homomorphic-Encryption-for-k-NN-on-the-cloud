@@ -53,7 +53,7 @@ if __name__ == '__main__':
             print("[CLOUD SERVER]Running operations on data")
             data[data["key"]] = factorize(integer)
 
-            with open("/vol/prime_factorization.txt", "a") as file:
+            with open("/factors-db/factors", "a") as file:
                 file.write(f"{data[data['key']]}\n")
 
             print("[CLOUD SERVER]Operations on the data are completed and uploaded to the volume mount")

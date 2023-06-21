@@ -10,7 +10,7 @@ if __name__ == '__main__':
     ADDR2 = (SERVER,PORT2)#cloud server
     FORMAT = 'utf-8'
 
-    with open("query_data.txt", "r") as file:
+    with open("/tmp/data/query_data.txt", "r") as file:
         integer = int(file.readline())
     query = {"key" : "password","password" : integer} #creates the query dictionary using the integer provided by the user
 
