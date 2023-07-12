@@ -38,6 +38,7 @@ class Paillier:
 
     def encrypt(self,plaintext):
         plaintext_int = int.from_bytes(plaintext, 'big')
+        print(plaintext_int)
 
         if(plaintext_int >= int(self.n)):
             raise ValueError("Invalid Message! Please try again with a smaller message.")
@@ -64,3 +65,16 @@ class Paillier:
             return plaintext_bytes
 
 
+
+p = Paillier(k=64)
+
+public_key = p.get_public_key()
+print(public_key)
+
+ciphertext = p.encrypt(b"52")
+print(int.from_bytes(ciphertext, 'big'))
+
+plaintext = p.decrypt(ciphertext)
+
+
+print(f"Plaintext : {plaintext.decode('utf-8')}")
