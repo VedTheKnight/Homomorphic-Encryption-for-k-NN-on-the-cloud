@@ -10,15 +10,16 @@ d=50
 m = 10000
 
 #socket information
-PORT1 = 65432 #port for the data owner
-SERVER = socket.gethostname() #gets the ip-address of the device
-ADDR1 = (SERVER,PORT1)
+PORT1 = 65432  # data owner port
+PORT2 = 65433  # cloud server port
+SERVER = socket.gethostname()
+ADDR1 = (SERVER, PORT1)  # data owner
+ADDR2 = (SERVER, PORT2)  # cloud server
 
 # initializing positive security parameters
 c = random.randint(1,10)
 e = random.randint(1,10)
 n = d+c+e+1
-D = [[]]
 
 #Helper Function to get a permutation function
 def getPerm(n):
@@ -40,7 +41,6 @@ def getPerm(n):
 #Helper Function to generate invertible matrix M
 def generateInvertibleMatrix(n):
 
-    # Generate a random matrix of size n x n with very small values this will limit size of A_q
     matrix = np.random.randint(10,size = (n,n))
     #matrix = np.random.rand(n,n) / 10000000000000
 
@@ -49,7 +49,6 @@ def generateInvertibleMatrix(n):
         #matrix = np.random.rand(n,n) / 10000000000000
         matrix = np.random.randint(10, size=(n, n))
 
-    print(f"Matrix M : {matrix}")
     return matrix
 
 #Obtains the dataset from database.txt
@@ -122,13 +121,14 @@ def computeEncryptedDatapoint(D,i,Key,v):
     M_inv = np.linalg.inv(M)
 
     p_encrypted = np.matmul(p_encrypted,M_inv)
+    p_encrypted = p_encrypted.tolist()
 
-    return p_encrypted
+    return p_encrypted[0] #this manipulation returns p_encrypted as a normal python list
 
 #encrypts the whole database
 def encryptData(D,Key):
 
-    D_encrypted = [[]]
+    D_encrypted = []
     for i in range(m):
         v = [random.random() * 1000 for _ in range(e)]
 
@@ -137,6 +137,34 @@ def encryptData(D,Key):
         D_encrypted.append(p_enc_i)
 
     return D_encrypted
+
+#to work with large database we set up this function
+def send_data(socket, data, buffer_size):
+    total_sent = 0
+    while total_sent < len(data):
+        chunk = data[total_sent:total_sent + buffer_size]
+        total_sent += socket.send(chunk)
+
+#Send the encrypted database
+def sendD_encrypted(D_encrypted):
+    dataOwner = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # creates the data owner socket
+    dataOwner.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)  # a useful line in debugging to prevent OSError: [Errno 98] Address already in use
+    dataOwner.bind(ADDR1)
+
+    dataOwner.connect(ADDR2)
+    print(f"[DATA OWNER]Connected to Cloud Server at {ADDR2}")
+
+    #convert the data into a dictionary
+    #D_encrypted = {str(i): D_encrypted[i] for i in range(m)}
+    #print(D_encrypted)
+    #dataOwner.sendall(json.dumps(D_encrypted).encode())
+    #' '.join(str(n) for n in D_encrypted[i])
+    send_data(dataOwner, json.dumps(D_encrypted).encode(), 4096) #set the buffer size as 4096
+
+    print(f"[DATA OWNER]Sent encrypted database to Cloud Server")
+
+    dataOwner.close()
+    print(f"[DATA OWNER]Closed connection")
 
 #Receive Encrypt and Send encrypted query to and from Query User with modifications. ONE TIME FUNCTION NEED TO INC. RE-USABILITY
 def queryRES(Key):
@@ -179,6 +207,7 @@ def queryRES(Key):
             conn.sendall(json.dumps(A_q).encode())
 
             print("[Data Owner]Sent the encrypted query back to the query user")
+            dataOwner.close()
             connected = False
 
         print(f"[DATA OWNER]{addr} has disconnected.")
@@ -216,7 +245,7 @@ def queryEncrypt(query_encrypted,Key,public_key):
     M = Key[3]
     c = len(Key[1])
     R_q = [int(random.random()*10) for i in range(c)] #c-dimensional random vector between one and ten
-    beta_q = random.random()/10000000000000  # random small positive number
+    beta_q = random.random()/10000  # random small positive number
     A_q = [0 for i in range(n)]
 
 
@@ -240,6 +269,8 @@ def queryEncrypt(query_encrypted,Key,public_key):
 
     return A_q
 
+#___________________________________________________________________________________________________________________
+
 #Obtain the database
 D = getD()
 print("[Data Owner]Obtained the database")
@@ -251,6 +282,9 @@ print("[Data Owner]Generated its private key")
 #Encrypt the data using the private Key
 D_encrypted = encryptData(D,Key)
 print("[Data Owner]Encrypted its data using the private key")
+
+#Send the encrypted database to the cloud server
+sendD_encrypted(D_encrypted)
 
 #Obtain the encrypted query from the Query User, perform necessary modification and send it back to the Query User - Receive Encrypt and Send
 queryRES(Key)

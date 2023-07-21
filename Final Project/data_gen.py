@@ -5,6 +5,6 @@ d = 50   # Dimension of each point
 
 with open("database.txt", "w") as file:
     for _ in range(m):
-        point = [random.randint(-1000, 1000) for _ in range(d)]
+        point = [random.randint(-10, 10) for _ in range(d)]
         line = " ".join(str(coord) for coord in point)
         file.write(line + "\n")
