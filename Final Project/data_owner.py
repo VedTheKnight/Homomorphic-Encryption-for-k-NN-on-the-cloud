@@ -38,16 +38,26 @@ def getPerm(n):
 
     return perm
 
+#Helper function to get the inverse of the permutation function
+def get_inverse_permutation(perm):
+    n = len(perm)
+    inverse_perm = [0] * n
+
+    for i in range(n):
+        inverse_perm[perm[i]] = i
+
+    return inverse_perm
+
 #Helper Function to generate invertible matrix M
 def generateInvertibleMatrix(n):
 
-    matrix = np.random.randint(10,size = (n,n))
-    #matrix = np.random.rand(n,n) / 10000000000000
+    matrix = 1 + np.random.randint(4,size = (n,n)) #---> THIS WORKS
+    #matrix = np.random.rand(n,n) / 10000000000000 #13->15 18 made it larger 20 gives all zeros
 
     # Check if the matrix is invertible
     while np.linalg.matrix_rank(matrix) < n:
-        #matrix = np.random.rand(n,n) / 10000000000000
-        matrix = np.random.randint(10, size=(n, n))
+        #matrix = np.random.rand(n,n) / 10000000000000 #13
+        matrix = 1 + np.random.randint(4, size=(n, n)) #---> THIS WORKS
 
     return matrix
 
@@ -145,7 +155,7 @@ def send_data(socket, data, buffer_size):
         chunk = data[total_sent:total_sent + buffer_size]
         total_sent += socket.send(chunk)
 
-#Send the encrypted database
+#Send the encrypted database to cloud server
 def sendD_encrypted(D_encrypted):
     dataOwner = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # creates the data owner socket
     dataOwner.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)  # a useful line in debugging to prevent OSError: [Errno 98] Address already in use
@@ -238,14 +248,13 @@ def queryEncrypt(query_encrypted,Key,public_key):
     #get necessary parameters
     perm = Key[2]
     #create inverse permutation list
-    inverse_perm = [0 for i in perm]
-    for i in range(len(perm)):
-        inverse_perm[perm[i]] = i
+    inverse_perm = get_inverse_permutation(perm)
 
     M = Key[3]
     c = len(Key[1])
-    R_q = [int(random.random()*10) for i in range(c)] #c-dimensional random vector between one and ten
-    beta_q = random.random()/10000  # random small positive number
+    R_q = [1+int(random.random()*9) for i in range(c)] #c-dimensional random vector between one and ten
+    beta_q = int(random.random()*4)+1#/10000  # random small positive number #10000 seems to be the sweet spot
+    #phi ~ 10^-14 gives decent results
     A_q = [0 for i in range(n)]
 
 
@@ -256,15 +265,16 @@ def queryEncrypt(query_encrypted,Key,public_key):
         for j in range(n):
             t = inverse_perm[j]
             if t < d:
-                phi = beta_q*M[i][j] # [0,1]*[0,10]/10000
-                A_q[i] = int(A_q[i]*pow(query_encrypted[t],phi))
+                phi = beta_q*M[i][j]
+                print(f"phi {phi},query encrypted {query_encrypted[t]}")
+                A_q[i] = int(mod(int(A_q[i]*pow(query_encrypted[t],phi)),public_key[0]**2))
             elif t == d:
-                phi = beta_q * M[i][j] # [0,1]*[0,10]/10000
-                A_q[i] = int(A_q[i] * encrypt(public_key,phi))
+                phi = beta_q * M[i][j]
+                A_q[i] = int(mod(int(A_q[i] * encrypt(public_key,phi)),public_key[0]**2))
             elif t < d+c+1:
                 w = t-d-1
-                phi = beta_q * M[i][j] * R_q[w] #[0,1]*[0,10]*[0,10]/10000
-                A_q[i] = int(A_q[i] * encrypt(public_key, phi))
+                phi = beta_q * M[i][j] * R_q[w]
+                A_q[i] = int(mod(int(A_q[i] * encrypt(public_key,phi)),public_key[0]**2))
 
 
     return A_q

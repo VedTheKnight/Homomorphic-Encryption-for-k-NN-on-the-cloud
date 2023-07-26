@@ -92,17 +92,17 @@ def getQ_dash_kNNCompute(D_encrypted,k):
     return True
 
 def kNNComp(D_encrypted,q_dash,k):
-    distance_set = []
+    dot_product_set = []
     for i in range(len(D_encrypted)):
-        distance_set.append(np.linalg.norm(np.array(D_encrypted[i]) - np.array(q_dash)))
+        dot_product_set.append(np.dot(np.array(D_encrypted[i]),np.array(q_dash)))
 
     indices = []  # To store the indices of the k lowest numbers
 
     for _ in range(k):
         min_index = -1
-        for i in range(len(distance_set)):
+        for i in range(len(dot_product_set)):
             if i not in indices:  # Skip indices that are already found
-                if min_index == -1 or distance_set[i] < distance_set[min_index]:
+                if min_index == -1 or dot_product_set[i] < dot_product_set[min_index]:
                     min_index = i
         indices.append(min_index)
 
@@ -114,6 +114,6 @@ D_encrypted = getD_encrypted()
 print(D_encrypted)
 
 #get the encrypted query from the query user
-if(getQ_dash_kNNCompute(D_encrypted, 3)):
+if(getQ_dash_kNNCompute(D_encrypted, 1)):
     print("Program Successful!")
 

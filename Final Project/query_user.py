@@ -38,6 +38,9 @@ class Paillier:
             self.l = lcm(self.p-1,self.q-1)
             #computes g=random number in {1,2,3,..n^2-1}
             self.g = randint(1,self.n**2-1)
+            while(gcd(self.g,self.n)!=1):
+                self.g = randint(1, self.n ** 2 - 1)
+
             #computes mu - modular multiplicative inverse
             if(gcd(L(int(power_mod(self.g,self.l,self.n**2)),self.n),self.n)==1):
                 self.mu = inverse_mod(int(L(int(power_mod(self.g,self.l,self.n**2)),self.n)),self.n)
@@ -68,14 +71,13 @@ class Paillier:
             return (x - 1) // n #note this is floor division in order to avoid overflow error
 
         #deleting this line since A_q is very large and always fails this
-        #if(ciphertext>=self.n**2):
-            #raise ValueError("Invalid Message! Please try again with a smaller message.")
+        #testing what happens on allowing this
+        if(ciphertext>=self.n**2):
+            raise ValueError("Invalid Message! Please try again with a smaller message.")
 
         #else:
         pm = power_mod(int(ciphertext),self.l,self.n*self.n)
-        print(pm)
         L_val = L(pm,self.n)
-        print(L_val)
         plaintext = int(mod(int(L_val)*self.mu,self.n))
         return plaintext
 
@@ -89,20 +91,6 @@ def sendAndReceiveQuerywithKey(message):
     client.connect(ADDR1)  # establishes connection with the data owner's port
     client.sendall(json.dumps(message).encode())  # sends the query to the data owner for modification
     print("[Query User]Sent the encrypted query - E_pk(q)")
-
-    '''
-    A_q = []
-    while True:
-        data = client.recv(32768).decode()
-        print(data)
-        point = json.loads(data)  # obtains the encrypted query - 1 dimensional vector to avoid overflow
-        print(point)
-
-        if(int(point[0]) == -1):
-            break
-
-        A_q.append(point[0])
-    '''
 
     A_q = json.loads(client.recv(32768).decode())
 
@@ -139,6 +127,10 @@ def send_data(socket, data, buffer_size):
 #generate a query - This can be taken as input from user - for now we initialize it to an arbitrary placeholder value
 #q = [random.randint(-10, 10) for _ in range(d)]
 q = [4, -3, -2, -3, 7, 6, -6, -9, -2, 5, 5, -9, -2, -9, -10, -9, -10, 4, 7, 8, 3, 2, 8, 0, 4, -8, 8, 6, -5, 6, 9, -6, -8, 1, 2, -10, -4, -9, -10, 6, -2, 1, -4, -6, -7, 6, -4, -8, -8, 8]
+#we scale our query -- an attempt
+#for i in range(len(q)):
+    #q[i]*= 1000
+
 print("[Query User]Generated random query")
 
 #Generate public key and private key of Homomorphic Crypto-system
