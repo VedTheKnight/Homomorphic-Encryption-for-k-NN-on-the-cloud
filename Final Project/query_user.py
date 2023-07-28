@@ -70,8 +70,6 @@ class Paillier:
         def L(x, n):
             return (x - 1) // n #note this is floor division in order to avoid overflow error
 
-        #deleting this line since A_q is very large and always fails this
-        #testing what happens on allowing this
         if(ciphertext>=self.n**2):
             raise ValueError("Invalid Message! Please try again with a smaller message.")
 
@@ -95,6 +93,8 @@ def sendAndReceiveQuerywithKey(message):
     A_q = json.loads(client.recv(32768).decode())
 
     print("[Query User]Received A_q")
+
+    #debugging
     for i in range(len(A_q)):
         print(f"A_q {i} {A_q[i]} ")
 
@@ -108,7 +108,7 @@ def sendAndReceiveIndexSet(q_dash):
 
     # interaction with the cloud server
     client.connect(ADDR2)  # establishes connection with the cloud server's port
-    #send_data(client, json.dumps(q_dash).encode(), 4096) #set the buffer size as 4096
+
     client.sendall(json.dumps(q_dash).encode())
     print("[Query User]Sent the encrypted query - q_dash")
 
@@ -127,9 +127,7 @@ def send_data(socket, data, buffer_size):
 #generate a query - This can be taken as input from user - for now we initialize it to an arbitrary placeholder value
 #q = [random.randint(-10, 10) for _ in range(d)]
 q = [4, -3, -2, -3, 7, 6, -6, -9, -2, 5, 5, -9, -2, -9, -10, -9, -10, 4, 7, 8, 3, 2, 8, 0, 4, -8, 8, 6, -5, 6, 9, -6, -8, 1, 2, -10, -4, -9, -10, 6, -2, 1, -4, -6, -7, 6, -4, -8, -8, 8]
-#we scale our query -- an attempt
-#for i in range(len(q)):
-    #q[i]*= 1000
+
 
 print("[Query User]Generated random query")
 

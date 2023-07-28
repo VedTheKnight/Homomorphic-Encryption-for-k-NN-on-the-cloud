@@ -36,6 +36,7 @@ def getPerm(n):
         perm[i] = perm[j]
         perm[j] = temp
 
+
     return perm
 
 #Helper function to get the inverse of the permutation function
@@ -51,13 +52,11 @@ def get_inverse_permutation(perm):
 #Helper Function to generate invertible matrix M
 def generateInvertibleMatrix(n):
 
-    matrix = 1 + np.random.randint(4,size = (n,n)) #---> THIS WORKS
-    #matrix = np.random.rand(n,n) / 10000000000000 #13->15 18 made it larger 20 gives all zeros
+    matrix = 1 + np.random.randint(4,size = (n,n)) #generates a nxn matrix with each element being an integer between 1 and 5
 
     # Check if the matrix is invertible
     while np.linalg.matrix_rank(matrix) < n:
-        #matrix = np.random.rand(n,n) / 10000000000000 #13
-        matrix = 1 + np.random.randint(4, size=(n, n)) #---> THIS WORKS
+        matrix = 1 + np.random.randint(4, size=(n, n))
 
     return matrix
 
@@ -89,7 +88,6 @@ def KeyGen():
 #encrypts single data point
 def computeEncryptedDatapoint(D,i,Key,v):
     p = D[i]
-
     mag_p = 0
     for i in p:
         mag_p += i*i
@@ -133,7 +131,7 @@ def computeEncryptedDatapoint(D,i,Key,v):
     p_encrypted = np.matmul(p_encrypted,M_inv)
     p_encrypted = p_encrypted.tolist()
 
-    return p_encrypted[0] #this manipulation returns p_encrypted as a normal python list
+    return p_encrypted[0] #this returns p_encrypted as a normal python list
 
 #encrypts the whole database
 def encryptData(D,Key):
@@ -164,11 +162,6 @@ def sendD_encrypted(D_encrypted):
     dataOwner.connect(ADDR2)
     print(f"[DATA OWNER]Connected to Cloud Server at {ADDR2}")
 
-    #convert the data into a dictionary
-    #D_encrypted = {str(i): D_encrypted[i] for i in range(m)}
-    #print(D_encrypted)
-    #dataOwner.sendall(json.dumps(D_encrypted).encode())
-    #' '.join(str(n) for n in D_encrypted[i])
     send_data(dataOwner, json.dumps(D_encrypted).encode(), 4096) #set the buffer size as 4096
 
     print(f"[DATA OWNER]Sent encrypted database to Cloud Server")
@@ -201,18 +194,9 @@ def queryRES(Key):
 
             print(f"[Data Owner]Successfully computed A_q")
 
+            #debugging
             for i in range(n):
                 print(f"A_q {i} {A_q[i]} ")
-
-            '''
-            A_q.append(-1) #the terminating character
-            for i in range(n):
-                print(f"A_q {i} {A_q[i]} ")
-
-            for i in range(len(A_q)):
-                message = [A_q[i]] # to prevent overflow
-                conn.sendall(json.dumps(message).encode())  # converts the list back into binary format and sends it back to client as data
-            '''
 
             conn.sendall(json.dumps(A_q).encode())
 
@@ -253,8 +237,7 @@ def queryEncrypt(query_encrypted,Key,public_key):
     M = Key[3]
     c = len(Key[1])
     R_q = [1+int(random.random()*9) for i in range(c)] #c-dimensional random vector between one and ten
-    beta_q = int(random.random()*4)+1#/10000  # random small positive number #10000 seems to be the sweet spot
-    #phi ~ 10^-14 gives decent results
+    beta_q = int(random.random()*4)+1 # random positive integer between 1 and 5
     A_q = [0 for i in range(n)]
 
 
@@ -264,13 +247,16 @@ def queryEncrypt(query_encrypted,Key,public_key):
 
         for j in range(n):
             t = inverse_perm[j]
+
             if t < d:
                 phi = beta_q*M[i][j]
                 print(f"phi {phi},query encrypted {query_encrypted[t]}")
                 A_q[i] = int(mod(int(A_q[i]*pow(query_encrypted[t],phi)),public_key[0]**2))
+
             elif t == d:
                 phi = beta_q * M[i][j]
                 A_q[i] = int(mod(int(A_q[i] * encrypt(public_key,phi)),public_key[0]**2))
+
             elif t < d+c+1:
                 w = t-d-1
                 phi = beta_q * M[i][j] * R_q[w]

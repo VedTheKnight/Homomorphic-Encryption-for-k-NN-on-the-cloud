@@ -28,8 +28,6 @@ def receive_data(socket, buffer_size):
 
 def getD_encrypted():
 
-    #D_encrypted = [0 for i in range(m)]
-
     cloudServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # creates the cloud server socket
     cloudServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)  # a useful line in debugging to prevent OSError: [Errno 98] Address already in use
     cloudServer.bind(ADDR2)
@@ -74,7 +72,6 @@ def getQ_dash_kNNCompute(D_encrypted,k):
         connected = True
         while connected:
 
-            #q_dash = json.loads(receive_data(conn, 4096).decode()) #set the buffer size as 4096
             q_dash = json.loads(conn.recv(32768).decode())
 
             print("[CLOUD SERVER]Encrypted query - q_dash Received")
