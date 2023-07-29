@@ -8,7 +8,7 @@
 4. **v** is a random e dimensional vector where each coordinate is a floating point number in the range [0,1000]. Used for encryption of database
 5. **R_q** is a random c dimensional vector where each coordinate is an integer between 1 and 100. Used in the computation of A_q
 6. **beta_q** is a random integer between 1 and 100. Used in the computation of A_q
-7. Negative Number handling : The negative coordinates in the Database as well as the query are mapped overwritten by *|p|+10000*.
+7. Negative Number handling : The negative coordinates in the Database as well as the query are overwritten by *|p|+10000*.
    This effectively maps our coordinates from [-10000,10000] to [0,20000]. This results in no change in Euclidean distances between the query and the datapoints
 
 ### Runtime Instructions:
