@@ -14,23 +14,23 @@
 ### Runtime Instructions:
 
 The programs must be executed in the following order:
-cloud_server.py -> data_owner.py -> query_user.py
+<br>cloud_server.py -> data_owner.py -> query_user.py
 
 #### Steps to be followed:
 
 1. To set up the Cloud Server run the following lines in powershell in the directory "Final Project"
-    *docker build -t cloud-server .*
-    *docker run -p 65433:65433 cloud-server*
+    <br>*docker build -t cloud-server .*
+    <br>*docker run -p 65433:65433 cloud-server*
 
 2. Now in 2 separate terminals open **sagemath environment** in the directory "Final Project". This can be done
 by running the command *sage* in the **wsl terminal**
 
 3. Run the file "data_owner.py" in one of the terminals.
-    *load("data_owner.py")*
+    <br>*load("data_owner.py")*
 
 4. Wait until you see "[CLOUD SERVER]Encrypted query - q_dash Received" message in the Cloud Server's terminal
    Run the file "query_user.py" in one of the terminals.
-    *load("query_user.py")*
+    <br>*load("query_user.py")*
 
 If everything has worked successfully you should see "Index Set : [3]" Message in the query user's terminal
 
