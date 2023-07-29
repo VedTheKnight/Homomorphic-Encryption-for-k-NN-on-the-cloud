@@ -10,9 +10,4 @@ Assignment 1 - Assignment 4 are the solutions to the weekly assignments provided
 
 The extra files folder contains alternate implementations of various programs not a part of our submissions which I have saved for reference
 
-The Final Project folder contains the implementation of the paper. This part is currently in progress and I have uploaded the code for the lastest stable version of the code.
-I am yet to : 
-1. Send encrypted database to the cloud server
-2. Perform K-NN transformation and relay the index set to the query user
-3. Dockerize the whole application as per specifications
-4. Add a README for the final project
+The Final Project folder contains the implementation of the paper.
