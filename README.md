@@ -10,4 +10,5 @@ Assignment 1 - Assignment 4 are the solutions to the weekly assignments provided
 
 The extra files folder contains alternate implementations of various programs not a part of our submissions which I have saved for reference
 
-The Final Project folder contains the implementation of the paper.
+The Final Project folder contains the implementation of the paper. Completed on of 29-07-2023.
+
