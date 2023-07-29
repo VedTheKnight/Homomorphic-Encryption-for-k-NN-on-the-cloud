@@ -16,7 +16,7 @@ SERVER = socket.gethostname()
 ADDR1 = (SERVER, PORT1)  # data owner
 ADDR2 = (SERVER, PORT2)  # cloud server
 
-
+#Paillier class in order to perform homomorphic encryption of the Query
 class Paillier:
 
     def __init__(self,k = 1024):
@@ -79,6 +79,7 @@ class Paillier:
         plaintext = int(mod(int(L_val)*self.mu,self.n))
         return plaintext
 
+#function that sends the encrypted query to the data owner and obtains A_q - Collaborative encryption scheme for query
 def sendAndReceiveQuerywithKey(message):
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # initializes the client object
@@ -94,14 +95,11 @@ def sendAndReceiveQuerywithKey(message):
 
     print("[Query User]Received A_q")
 
-    #debugging
-    for i in range(len(A_q)):
-        print(f"A_q {i} {A_q[i]} ")
-
     client.close()  # closes the connection with the data owner
 
     return A_q
 
+#function that sends q_dash to the Cloud Server and receives back the index set after k-NN computation
 def sendAndReceiveIndexSet(q_dash):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # initializes the client object
     client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)  # a useful line in debugging to prevent OSError: [Errno 98] Address already in use
@@ -117,6 +115,7 @@ def sendAndReceiveIndexSet(q_dash):
 
     return index_set
 
+#function to stream large amount of data in chunks
 def send_data(socket, data, buffer_size):
     total_sent = 0
     while total_sent < len(data):
@@ -125,11 +124,16 @@ def send_data(socket, data, buffer_size):
 
 
 #generate a query - This can be taken as input from user - for now we initialize it to an arbitrary placeholder value
-#q = [random.randint(-10, 10) for _ in range(d)]
-q = [4, -3, -2, -3, 7, 6, -6, -9, -2, 5, 5, -9, -2, -9, -10, -9, -10, 4, 7, 8, 3, 2, 8, 0, 4, -8, 8, 6, -5, 6, 9, -6, -8, 1, 2, -10, -4, -9, -10, 6, -2, 1, -4, -6, -7, 6, -4, -8, -8, 8]
-
+#q = [random.randint(-10000, 10000) for _ in range(d)]
+q = [2102, 9253, -5196, -7513, -333, -962, -4486, 6424, 7521 ,9353 ,2475, -7396, -7381, -8905, 5984, 3675 ,4310, -8795 ,680, -6550, -1604, 4352, 6142, -5122 ,1890, 8351, -9716 ,3934 ,139, 2766 ,-3235 ,3406 ,5233 ,-3624, -7196, 7671, 9281 ,1703, 8131, -1119, -4485, -4919 ,3106 ,-1763 ,-343 ,-1255 ,241 ,2234 ,-2793 ,-6850]
+#we set the query as the first point in the database, so we expect the index set to be [0] for k=1
 
 print("[Query User]Generated random query")
+
+#We apply shifting here as well to eliminate the negative values
+for i in range(d):
+    if q[i] < 0:
+        q[i] = abs(q[i]) + 10000
 
 #Generate public key and private key of Homomorphic Crypto-system
 paillier = Paillier(k=16)
@@ -139,7 +143,7 @@ print(f"Public Key {public_key}")
 
 #encrypt the query point to send to the Data Owner
 q_cipher = [paillier.encrypt(x) for x in q]
-print(f"[Query User]Encrypted the query : {q_cipher}")
+print(f"[Query User]Encrypted the query ")
 
 #we want to send both the public key and the q_cipher to the data owner so that he can generate A_q
 message = [public_key,q_cipher]
@@ -150,8 +154,6 @@ A_q = sendAndReceiveQuerywithKey(message)
 #Now decrypts using the secret paillier key
 q_dash = [paillier.decrypt(x) for x in A_q]
 print("[Query User]Computed q_dash")
-
-print(q_dash)
 
 #Send q_dash to the cloud server and receive the index set after k-NN computation
 index_set = sendAndReceiveIndexSet(q_dash)

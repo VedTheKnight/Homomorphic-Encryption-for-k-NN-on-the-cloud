@@ -26,6 +26,7 @@ def receive_data(socket, buffer_size):
         received_data += data_chunk
     return received_data
 
+#function to get the encrypted database from the Data Owner
 def getD_encrypted():
 
     cloudServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # creates the cloud server socket
@@ -55,6 +56,7 @@ def getD_encrypted():
 
     return D_encrypted
 
+#Gets the encrypted query - q' from the query user and returns True if it manages to compute kNN successfully and send it back to the query user
 def getQ_dash_kNNCompute(D_encrypted,k):
 
     cloudServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # creates the cloud server socket
@@ -88,6 +90,7 @@ def getQ_dash_kNNCompute(D_encrypted,k):
 
     return True
 
+#Gets the k-Nearest Neighbours of the query by comparing dot products of the encrypted query with each encrypted datapoint
 def kNNComp(D_encrypted,q_dash,k):
     dot_product_set = []
     for i in range(len(D_encrypted)):
@@ -105,12 +108,16 @@ def kNNComp(D_encrypted,q_dash,k):
 
     return indices
 
+#___________________________________________________________________________________________________________________
+
 #get the encrypted database from the data owner
 D_encrypted = getD_encrypted()
+print("[CLOUD SERVER]Obtained D_encrypted")
 
-print(D_encrypted)
+#Set k for kNN computation
+k = 1
 
 #get the encrypted query from the query user
-if(getQ_dash_kNNCompute(D_encrypted, 1)):
-    print("Program Successful!")
+if(getQ_dash_kNNCompute(D_encrypted, k)):
+    print("[CLOUD SERVER]kNN Computation successful")
 

@@ -58,7 +58,13 @@ def generateInvertibleMatrix(n):
     while np.linalg.matrix_rank(matrix) < n:
         matrix = 1 + np.random.randint(4, size=(n, n))
 
-    return matrix
+    # Convert NumPy matrix to multidimensional list
+    matrix_list = []
+    for row in matrix:
+        nested_list = list(row)
+        matrix_list.append(nested_list)
+
+    return matrix_list
 
 #Obtains the dataset from database.txt
 def getD():
@@ -67,6 +73,12 @@ def getD():
     for x in f:
         row = [int(num) for num in x.strip().split()]
         D.append(row)
+
+    #We must apply shifting to make sure that no negative values are a part of our database
+    for i in range(m):
+        for j in range(d):
+            if D[i][j]<0:
+                D[i][j] = abs(D[i][j])+10000
 
     return D
 
@@ -88,10 +100,9 @@ def KeyGen():
 #encrypts single data point
 def computeEncryptedDatapoint(D,i,Key,v):
     p = D[i]
-    mag_p = 0
+    mag_p_2 = 0
     for i in p:
-        mag_p += i*i
-    mag_p = math.sqrt(mag_p)
+        mag_p_2 += i*i
 
     S = Key[0]
     t = Key[1]
@@ -105,7 +116,7 @@ def computeEncryptedDatapoint(D,i,Key,v):
     for i in range(d):
         p_intermediate.append(S[i] - 2*p[i])
 
-    p_intermediate.append(S[d]+mag_p*mag_p)
+    p_intermediate.append(S[d]+mag_p_2)
 
     for i in t:
         p_intermediate.append(i)
@@ -115,7 +126,6 @@ def computeEncryptedDatapoint(D,i,Key,v):
 
     #permutation
     c = 0
-
     for element in p_intermediate:
         p_encrypted[perm[c]] = element
         c+=1
@@ -146,7 +156,7 @@ def encryptData(D,Key):
 
     return D_encrypted
 
-#to work with large database we set up this function
+#we set up this function to be able to send large database across sockets
 def send_data(socket, data, buffer_size):
     total_sent = 0
     while total_sent < len(data):
@@ -194,10 +204,6 @@ def queryRES(Key):
 
             print(f"[Data Owner]Successfully computed A_q")
 
-            #debugging
-            for i in range(n):
-                print(f"A_q {i} {A_q[i]} ")
-
             conn.sendall(json.dumps(A_q).encode())
 
             print("[Data Owner]Sent the encrypted query back to the query user")
@@ -207,7 +213,7 @@ def queryRES(Key):
         print(f"[DATA OWNER]{addr} has disconnected.")
         break
 
-#Paillier Encryption Function
+#Paillier Encryption Function needed while calculating A_q
 def encrypt(public_key, plaintext):
 
     n = public_key[0]
@@ -236,32 +242,33 @@ def queryEncrypt(query_encrypted,Key,public_key):
 
     M = Key[3]
     c = len(Key[1])
-    R_q = [1+int(random.random()*9) for i in range(c)] #c-dimensional random vector between one and ten
-    beta_q = int(random.random()*4)+1 # random positive integer between 1 and 5
+    R_q = [1+int(random.random()*99) for i in range(c)] #c-dimensional random vector having integers between 1 and 100
+    beta_q =1+int(random.random()*99) # random positive integer between 1 and 100
     A_q = [0 for i in range(n)]
 
+    #To convert n and g to normal integers
+    public_key[0] = int(public_key[0])
+    public_key[1] = int(public_key[1])
 
     #compute n-dimensional encrypted vector A_q
     for i in range(n):
-        A_q[i] = encrypt(public_key,0)
+        A_q[i] = int(encrypt(public_key,0))
 
         for j in range(n):
             t = inverse_perm[j]
 
             if t < d:
-                phi = beta_q*M[i][j]
-                print(f"phi {phi},query encrypted {query_encrypted[t]}")
-                A_q[i] = int(mod(int(A_q[i]*pow(query_encrypted[t],phi)),public_key[0]**2))
+                phi = int(beta_q) * int(M[i][j])
+                A_q[i] = int(mod(A_q[i] * int(query_encrypted[t])**phi,int(public_key[0]**2)))
 
             elif t == d:
-                phi = beta_q * M[i][j]
-                A_q[i] = int(mod(int(A_q[i] * encrypt(public_key,phi)),public_key[0]**2))
+                phi = int(beta_q) * int(M[i][j])
+                A_q[i] = int(mod(A_q[i] * int(encrypt(public_key,phi)),int(public_key[0]**2)))
 
             elif t < d+c+1:
                 w = t-d-1
-                phi = beta_q * M[i][j] * R_q[w]
-                A_q[i] = int(mod(int(A_q[i] * encrypt(public_key,phi)),public_key[0]**2))
-
+                phi = int(beta_q) * int(M[i][j]) * int(R_q[w]) #1 to 125
+                A_q[i] = int(mod(A_q[i] * int(encrypt(public_key,phi)),int(public_key[0]**2)))
 
     return A_q
 
@@ -282,6 +289,6 @@ print("[Data Owner]Encrypted its data using the private key")
 #Send the encrypted database to the cloud server
 sendD_encrypted(D_encrypted)
 
-#Obtain the encrypted query from the Query User, perform necessary modification and send it back to the Query User - Receive Encrypt and Send
+#Obtain the encrypted query from the Query User, perform necessary modification and send it back to the Query User - Receive, Encrypt and Send
 queryRES(Key)
 
