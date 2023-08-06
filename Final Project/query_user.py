@@ -139,7 +139,6 @@ for i in range(d):
 paillier = Paillier(k=16)
 
 public_key = paillier.get_public_key()
-print(f"Public Key {public_key}")
 
 #encrypt the query point to send to the Data Owner
 q_cipher = [paillier.encrypt(x) for x in q]
